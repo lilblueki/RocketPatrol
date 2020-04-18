@@ -1,4 +1,3 @@
-//Single Player Mode
 class Play extends Phaser.Scene {
     constructor() {
         super("playScene");
@@ -13,6 +12,8 @@ class Play extends Phaser.Scene {
     }
 
     create(){
+        //this.add.text(20,20, "Rocket Patrol Play");
+        //place tile sprite
         this.starfield = this.add.tileSprite(0, 0, 640, 480, 'starfield').setOrigin(0,0);
 
         //white rectangle border
@@ -93,20 +94,28 @@ class Play extends Phaser.Scene {
             this.ship02.update();
             this.ship03.update();
         }
-    
+       
+
         //check collisions 
         if (this.checkCollision(this.p1Rocket, this.ship03)){
             this.p1Rocket.reset();
             this.shipExplode(this.ship03);
+            //this.ship03.reset();
+            //console.log('kaboom ship 03');
         }
         if (this.checkCollision(this.p1Rocket, this.ship02)){
             this.p1Rocket.reset();
             this.shipExplode(this.ship02);
+            //this.ship02.reset();
+            //console.log('kaboom ship 02');
         }
         if (this.checkCollision(this.p1Rocket, this.ship01)){
             this.p1Rocket.reset();
             this.shipExplode(this.ship01);
-        }  
+            //this.ship01.reset();
+            //console.log('kaboom ship 01');
+        }
+        
     }
 
     //collision checking - do the two "rectangles" overlap?

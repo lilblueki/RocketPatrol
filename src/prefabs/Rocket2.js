@@ -1,5 +1,5 @@
-//Rocket (Player 1) prefab
-class Rocket extends Phaser.GameObjects.Sprite {
+//Rocket (Player 2) prefab
+class Rocket2 extends Phaser.GameObjects.Sprite {
     constructor (scene, x, y, texture, frame){
         super(scene, x, y, texture, frame);
         
@@ -11,34 +11,33 @@ class Rocket extends Phaser.GameObjects.Sprite {
    }
 
    update() {
-       //left/right movement - Player1
+       //left/right movement - Player 2
         if (!this.isFiring) {
-            if (keyLEFT.isDown && this.x >=-120){ 
-                this.x -= 2; 
-            } else if (keyRIGHT.isDown && this.x <= 425){
+            if (keyA.isDown && this.x >= 200){
+                this.x -= 2;
+            } else if (keyD.isDown && this.x <= 745){
                 this.x += 2;
             }
         }
         
-        //fire button  ***make it so the in multiplayer you cant shoot using F***
-        if (Phaser.Input.Keyboard.JustDown(keyF) && !this.isFiring) {
+        //fire button 
+        if (Phaser.Input.Keyboard.JustDown(keyW) && !this.isFiring) {
             this.isFiring = true;
             this.sfxRocket.play();
         }
-      
         if (this.isFiring && this.y >= 108) {
             this.y -= 2;
         }
-
         //reset on miss
         if (this.y <= 108){
            this.reset();
         }
-        
-    }
-    //rocket goes back to starting postion
-    reset() {
-        this.isFiring = false;
-        this.y = 431
-    }
+   }
+   //rocket goes back to starting postion
+   reset() {
+    this.isFiring = false;
+    this.y = 431
+   }
+
+
 }

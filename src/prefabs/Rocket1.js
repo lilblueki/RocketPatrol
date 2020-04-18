@@ -1,5 +1,5 @@
-//Rocket (Player 1) prefab
-class Rocket extends Phaser.GameObjects.Sprite {
+//Rocket (Player 1/ Multiplayer) prefab
+class Rocket1 extends Phaser.GameObjects.Sprite {
     constructor (scene, x, y, texture, frame){
         super(scene, x, y, texture, frame);
         
@@ -21,11 +21,11 @@ class Rocket extends Phaser.GameObjects.Sprite {
         }
         
         //fire button  ***make it so the in multiplayer you cant shoot using F***
-        if (Phaser.Input.Keyboard.JustDown(keyF) && !this.isFiring) {
+        if (Phaser.Input.Keyboard.JustDown(keyUP) && !this.isFiring) {
             this.isFiring = true;
             this.sfxRocket.play();
         }
-      
+
         if (this.isFiring && this.y >= 108) {
             this.y -= 2;
         }

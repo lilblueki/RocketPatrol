@@ -1,7 +1,7 @@
-//Single Player Mode
-class Play extends Phaser.Scene {
+//Multiplayer Mode
+class Play2 extends Phaser.Scene {
     constructor() {
-        super("playScene");
+        super("play2Scene");
     }
 
     preload(){
@@ -13,6 +13,7 @@ class Play extends Phaser.Scene {
     }
 
     create(){
+        //place tile sprite
         this.starfield = this.add.tileSprite(0, 0, 640, 480, 'starfield').setOrigin(0,0);
 
         //white rectangle border
@@ -25,18 +26,27 @@ class Play extends Phaser.Scene {
         this.add.rectangle(37,42,566,64, 0x00FF00).setOrigin(0,0);
 
         //add the rocket - player1
-        this.p1Rocket = new Rocket(this, game.config.width/2, 431, 'rocket').setScale(.5, .5).setOrigin(0, 0);
+        this.p1Rocket = new Rocket1(this, game.config.width/2 + 150, 431, 'rocket').setScale(.5, .5).setOrigin(0, 0); //adjust location <------
+        //add 2nd rocket - Multiplayer, Player2
+        this.p2Rocket = new Rocket2(this, game.config.width/2 - 150, 431, 'rocket').setScale(.5, .5).setOrigin(0, 0); //adjust location <------
     
         //add spaceships
         this.ship01 = new Spaceship(this, game.config.width + 192, 132, 'spaceship', 0, 30).setOrigin(0,0);
         this.ship02 = new Spaceship(this, game.config.width + 96, 196, 'spaceship', 0, 20).setOrigin(0,0);
         this.ship03 = new Spaceship(this, game.config.width, 260, 'spaceship', 0, 10).setOrigin(0,0);
 
-        //define keyboard keys
-        keyF = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
-        keyLEFT = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
-        keyRIGHT = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
+        //define keyboard keys - Player 1
+        keyF = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F); //single player mode (shoot)
+        keyUP = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP); //mulitplayer mode (shoot)
         
+        keyLEFT = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT); //both modes
+        keyRIGHT = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT); //both modes
+        
+        //define keyboard keys - Player 2
+        keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
+        keyW = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
+        keyD = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
+
         //animation config
         this.anims.create({
             key: 'explode',
@@ -46,6 +56,8 @@ class Play extends Phaser.Scene {
 
         //score - intialized at 0pts
         this.p1Score = 0;
+            //added
+        this.p2Score = 0; //Player 2 score
 
         //score display
         let scoreConfig = {
@@ -57,7 +69,9 @@ class Play extends Phaser.Scene {
             padding: {top: 5, bottom: 5,},
             fixedWidth: 100
         }
-        this.scoreLeft = this.add.text(69, 54, this.p1Score, scoreConfig);
+        this.scoreLeft = this.add.text(469, 54, this.p1Score, scoreConfig); //score display - Player 1
+            
+        this.scoreRight = this.add.text(69, 54, this.p2Score, scoreConfig); //score display - Multiplayer, Player 2
         
         //game over flag
         this.gameOver = false;
@@ -66,15 +80,16 @@ class Play extends Phaser.Scene {
         scoreConfig.fixedWidth = 0;
         this.clock = this.time.delayedCall (game.settings.gameTimer, () => {
             this.add.text(game.config.width/2, game.config.height/2, 'GAME OVER', scoreConfig).setOrigin(0.5);
-            this.add.text(game.config.width/2, game.config.height/2 + 64, '(F)IRE TO RESTART or <- for Menu', scoreConfig).setOrigin(0.5);
+            this.add.text(game.config.width/2, game.config.height/2 + 64, 'PRESS (A) TO RESTART or <- FOR MENU', scoreConfig).setOrigin(0.5);
             this.gameOver = true;
         }, null, this);
     }
 
     update(){
         //check key input for restart
-        if (this.gameOver && Phaser.Input.Keyboard.JustDown(keyF)){
+        if (this.gameOver && Phaser.Input.Keyboard.JustDown(keyA)){
             this.scene.restart(this.p1Score);
+            this.scene.restart(this.p2Score);
         }
         if (this.gameOver && Phaser.Input.Keyboard.JustDown(keyLEFT)) {
             this.scene.start("menuScene");
@@ -85,28 +100,61 @@ class Play extends Phaser.Scene {
 
         //update rocket
         this.p1Rocket.update();
+        //update Player 2 
+        this.p2Rocket.update();
 
         //update spaceship
         if (!this.gameOver) {
             this.p1Rocket.update();
+            this.p2Rocket.update();
             this.ship01.update();
             this.ship02.update();
             this.ship03.update();
         }
-    
+
         //check collisions 
         if (this.checkCollision(this.p1Rocket, this.ship03)){
             this.p1Rocket.reset();
             this.shipExplode(this.ship03);
+            this.p1Score += this.ship03.points;
+            this.scoreLeft.text = this.p1Score;
+            this.sound.play('sfx_explosion');
+        }
+        if (this.checkCollision(this.p2Rocket, this.ship03)){
+            this.p2Rocket.reset();
+            this.shipExplode(this.ship03);
+            this.p2Score += this.ship03.points;
+            this.scoreRight.text = this.p2Score;
+            this.sound.play('sfx_explosion');
         }
         if (this.checkCollision(this.p1Rocket, this.ship02)){
             this.p1Rocket.reset();
             this.shipExplode(this.ship02);
+            this.p1Score += this.ship02.points;
+            this.scoreLeft.text = this.p1Score;
+            this.sound.play('sfx_explosion');
+        }
+        if (this.checkCollision(this.p2Rocket, this.ship02)){
+            this.p2Rocket.reset();
+            this.shipExplode(this.ship02);
+            this.p2Score += this.ship02.points;
+            this.scoreRight.text = this.p2Score;
+            this.sound.play('sfx_explosion');
         }
         if (this.checkCollision(this.p1Rocket, this.ship01)){
             this.p1Rocket.reset();
             this.shipExplode(this.ship01);
-        }  
+            this.p1Score += this.ship01.points;
+            this.scoreLeft.text = this.p1Score;
+            this.sound.play('sfx_explosion');
+        }
+        if (this.checkCollision(this.p2Rocket, this.ship01)){
+            this.p2Rocket.reset();
+            this.shipExplode(this.ship01);
+            this.p2Score += this.ship01.points;
+            this.scoreRight.text = this.p2Score;
+            this.sound.play('sfx_explosion');
+        }
     }
 
     //collision checking - do the two "rectangles" overlap?
@@ -128,9 +176,5 @@ class Play extends Phaser.Scene {
             ship.alpha = 1;
             boom.destroy();
         });
-        //score increment and adjustment
-        this.p1Score += ship.points;
-        this.scoreLeft.text = this.p1Score;
-        this.sound.play('sfx_explosion');
     }
 }
